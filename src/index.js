@@ -1,6 +1,7 @@
 'use strict';
 
 const { promisify: p } = require( 'util' );
+const { spawn } = require( 'child_process' );
 const path = require( 'path' );
 const fs = require( 'fs' );
 const mkdirp = p( require( 'mkdirp' ) );
@@ -20,7 +21,7 @@ module.exports = cleanup( async pkg_root => {
   await p( fs.writeFile )( tmp_pkg_filename, '{}' );
 
   // Yarn instance to run yarn commands
-  const yarn = Yarn( { cwd: tmp_dir } );
+  const yarn = new Yarn( { cwd: tmp_dir } );
 
   const results = {
     dependencies: {},
@@ -30,7 +31,11 @@ module.exports = cleanup( async pkg_root => {
   };
 
   for ( const [ name, version ] of Object.entries( src_pkg.dependencies ) ) {
-    results.dependencies[ name ] = await yarn( 'add', `${name}@${version}` );
+    results.dependencies[ name ] = await yarn.add( `${name}@${version}` );
+  }
+
+  for ( const [ name, version ] of Object.entries( src_pkg.devDependencies ) ) {
+    results.devDependencies[ name ] = await yarn.add( '--dev', `${name}@${version}` );
   }
 
   return results;
@@ -38,22 +43,58 @@ module.exports = cleanup( async pkg_root => {
 } );
 
 function cleanup( fn ) {
-  return async ( ...args ) =>
-    fn( ...args )
-      .catch( err => err )
-      .then( err =>
-        rimraf( tmp_dir )
-          .catch( console.error )
-          .then( () => {
-            if ( err ) {
-              throw err;
-            }
-          } ),
-      );
+  return async ( ...args ) => {
+
+    let err;
+    const results = await fn( ...args ).catch( e => err = e );
+
+    await rimraf( tmp_dir ).catch( () => 0 );
+
+    if ( err ) {
+      throw err;
+    }
+
+    return results;
+
+  };
 }
 
-function Yarn( { cwd } = {} ) {
-  return async ( ...args ) => {
-    return null;
-  };
+class Yarn {
+
+  constructor( { cwd } = {} ) {
+    this.cwd = cwd;
+  }
+
+  async spawn( ...args ) {
+    return new Promise( ( resolve, reject ) => {
+
+      const result = {
+        // stdout: [],
+        stderr: [],
+      };
+
+      const done = () => {
+        result.stdout = result.stdout.join( '' );
+        result.stderr = result.stderr.filter( l => !l.startsWith( 'warning' ) ).join( '' );
+        resolve( result );
+      };
+
+      console.log( 'yarn', ...args );
+
+      const yarn = spawn( 'yarn', args, { cwd: this.cwd } );
+
+      // yarn.stdout.on( 'data', data => result.stdout.push( data.toString() ) );
+      yarn.stderr.on( 'data', data => result.stderr.push( data.toString() ) );
+
+      yarn.on( 'error', err => reject( err ) );
+      yarn.on( 'exit', () => done() );
+
+    } );
+  }
+
+  async add( ...args ) {
+    const result = await this.spawn( 'add', ...args );
+    return result;
+  }
+
 }
