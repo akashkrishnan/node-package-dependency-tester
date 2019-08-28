@@ -26,16 +26,22 @@ module.exports = cleanup( async pkg_root => {
   const results = {
     dependencies: {},
     devDependencies: {},
-    peerDependencies: {},
-    optionalDependencies: {},
+    // peerDependencies: {},
+    // optionalDependencies: {},
   };
 
   for ( const [ name, version ] of Object.entries( src_pkg.dependencies ) ) {
-    results.dependencies[ name ] = await yarn.add( `${name}@${version}` );
+    const err = await yarn.add( resolveDepName( name, version ) );
+    if ( err ) {
+      results.dependencies[ name ] = err;
+    }
   }
 
   for ( const [ name, version ] of Object.entries( src_pkg.devDependencies ) ) {
-    results.devDependencies[ name ] = await yarn.add( '--dev', `${name}@${version}` );
+    const err = await yarn.add( '--dev', resolveDepName( name, version ) );
+    if ( err ) {
+      results.devDependencies[ name ] = err;
+    }
   }
 
   return results;
@@ -59,6 +65,16 @@ function cleanup( fn ) {
   };
 }
 
+function resolveDepName( name, version ) {
+  try {
+    new URL( version );
+    return version;
+  }
+  catch ( err ) {
+    return `${name}@${version}`;
+  }
+}
+
 class Yarn {
 
   constructor( { cwd } = {} ) {
@@ -68,23 +84,19 @@ class Yarn {
   async spawn( ...args ) {
     return new Promise( ( resolve, reject ) => {
 
-      const result = {
-        // stdout: [],
-        stderr: [],
-      };
+      const lines = [];
 
       const done = () => {
-        // result.stdout = result.stdout.join( '' );
-        result.stderr = result.stderr.filter( l => !l.startsWith( 'warning' ) ).join( '' );
-        resolve( result );
+        const error = lines.filter( l => !l.startsWith( 'warning' ) ).join( '' );
+        resolve( error );
       };
 
       console.log( 'yarn', ...args );
 
       const yarn = spawn( 'yarn', args, { cwd: this.cwd } );
 
-      // yarn.stdout.on( 'data', data => result.stdout.push( data.toString() ) );
-      yarn.stderr.on( 'data', data => result.stderr.push( data.toString() ) );
+      // yarn.stdout.on( 'data', data => console.log( data.toString() ) );
+      yarn.stderr.on( 'data', data => lines.push( data.toString() ) );
 
       yarn.on( 'error', err => reject( err ) );
       yarn.on( 'exit', () => done() );

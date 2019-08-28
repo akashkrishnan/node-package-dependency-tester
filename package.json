@@ -1,5 +1,5 @@
 {
-  "name": "node-package-dependency-tester",
+  "name": "@akashkrishnan/node-package-dependency-tester",
   "version": "0.0.0",
   "description": "node-package-dependency-tester",
   "repository": "git@github.com:akashkrishnan/node-package-dependency-tester",
