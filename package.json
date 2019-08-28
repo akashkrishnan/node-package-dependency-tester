@@ -5,7 +5,6 @@
   "repository": "git@github.com:akashkrishnan/node-package-dependency-tester",
   "author": "Akash Krishnan <ak@aakay.net>",
   "license": "MIT",
-  "private": false,
   "main": "src/index.js",
   "engines": {
     "node": "*"
