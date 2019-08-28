@@ -328,3 +328,4 @@ $RECYCLE.BIN/
 # End of https://www.gitignore.io/api/git,osx,node,linux,macos,windows,webstorm+all,jetbrains+all
 
 /temp/
+/results.yaml
