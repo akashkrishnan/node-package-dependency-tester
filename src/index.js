@@ -74,7 +74,7 @@ class Yarn {
       };
 
       const done = () => {
-        result.stdout = result.stdout.join( '' );
+        // result.stdout = result.stdout.join( '' );
         result.stderr = result.stderr.filter( l => !l.startsWith( 'warning' ) ).join( '' );
         resolve( result );
       };
