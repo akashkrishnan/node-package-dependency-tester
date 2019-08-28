@@ -1,0 +1,20 @@
+{
+  "name": "node-package-dependency-tester",
+  "version": "0.0.0",
+  "description": "node-package-dependency-tester",
+  "repository": "git@github.com:akashkrishnan/node-package-dependency-tester",
+  "author": "Akash Krishnan <ak@aakay.net>",
+  "license": "MIT",
+  "private": false,
+  "main": "src/index.js",
+  "engines": {
+    "node": "*"
+  },
+  "scripts": {
+    "test": "node test/index.js"
+  },
+  "dependencies": {
+    "mkdirp": "^0.5.1",
+    "rimraf": "^3.0.0"
+  }
+}
