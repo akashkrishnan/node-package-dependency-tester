@@ -31,7 +31,7 @@ module.exports = cleanup( async pkg_root => {
   };
 
   for ( const depType of Object.keys( results ) ) {
-    for ( const [ name, version ] of Object.entries( src_pkg[ depType ] ) ) {
+    for ( const [ name, version ] of Object.entries( src_pkg[ depType ] || {} ) ) {
 
       const isDev = depType.startsWith( 'dev' );
 
