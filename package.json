@@ -6,6 +6,7 @@
   "author": "Akash Krishnan <ak@aakay.net>",
   "license": "MIT",
   "main": "src/index.js",
+  "bin": "src/index.js",
   "engines": {
     "node": "*"
   },
