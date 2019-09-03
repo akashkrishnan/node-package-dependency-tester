@@ -1,6 +1,6 @@
 'use strict';
 
-const test = require( '../src' );
+const test = require( '../bin' );
 const { promisify: p } = require( 'util' );
 const path = require( 'path' );
 const fs = require( 'fs' );
