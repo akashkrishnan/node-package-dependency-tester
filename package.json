@@ -14,10 +14,8 @@
     "test": "node test/index.js"
   },
   "dependencies": {
+    "js-yaml": "^3.13.1",
     "mkdirp": "^0.5.1",
     "rimraf": "^3.0.0"
-  },
-  "devDependencies": {
-    "js-yaml": "^3.13.1"
   }
 }
