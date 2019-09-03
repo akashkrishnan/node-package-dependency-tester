@@ -34,9 +34,12 @@ module.exports = cleanup( async pkg_root => {
     for ( const [ name, version ] of Object.entries( src_pkg[ depType ] || {} ) ) {
 
       const isDev = depType.startsWith( 'dev' );
+      const depName = resolveDepName( name, version );
 
       // Try to install dependency
-      let err = await yarn.add( isDev ? '--dev' : '', resolveDepName( name, version ) );
+      let err = isDev ?
+        await yarn.add( '--dev', depName ) :
+        await yarn.add( depName );
 
       if ( err ) {
         results[ depType ][ name ] = { add: err };
