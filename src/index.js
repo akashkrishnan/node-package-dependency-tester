@@ -30,17 +30,29 @@ module.exports = cleanup( async pkg_root => {
     // optionalDependencies: {},
   };
 
-  for ( const [ name, version ] of Object.entries( src_pkg.dependencies ) ) {
-    const err = await yarn.add( resolveDepName( name, version ) );
-    if ( err ) {
-      results.dependencies[ name ] = err;
-    }
-  }
+  for ( const depType of Object.keys( results ) ) {
+    for ( const [ name, version ] of Object.entries( src_pkg[ depType ] ) ) {
 
-  for ( const [ name, version ] of Object.entries( src_pkg.devDependencies ) ) {
-    const err = await yarn.add( '--dev', resolveDepName( name, version ) );
-    if ( err ) {
-      results.devDependencies[ name ] = err;
+      const isDev = depType.startsWith( 'dev' );
+
+      // Try to install dependency
+      let err = await yarn.add( isDev ? '--dev' : '', resolveDepName( name, version ) );
+
+      if ( err ) {
+        results[ depType ][ name ] = { add: err };
+        continue;
+      }
+
+      continue;
+
+      // Run dependency's tests
+      const dep_dir = path.resolve( tmp_dir, 'node_modules', name );
+      err = await new Yarn( { cwd: dep_dir } ).test();
+
+      if ( err ) {
+        results[ depType ][ name ] = { test: err };
+      }
+
     }
   }
 
@@ -105,8 +117,11 @@ class Yarn {
   }
 
   async add( ...args ) {
-    const result = await this.spawn( 'add', ...args );
-    return result;
+    return this.spawn( 'add', ...args );
+  }
+
+  async test( ...args ) {
+    return this.spawn( 'test', ...args );
   }
 
 }
