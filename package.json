@@ -1,6 +1,6 @@
 {
   "name": "@akashkrishnan/package-dependency-tester",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "node-package-dependency-tester",
   "repository": "git@github.com:akashkrishnan/node-package-dependency-tester",
   "author": "Akash Krishnan <ak@aakay.net>",
